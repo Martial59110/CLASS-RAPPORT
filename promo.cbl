@@ -85,9 +85,10 @@
                OCCURS 1 TO 999 TIMES
                DEPENDING ON GRADE-LGTH
                INDEXED BY IDX-GRADE. 
-                   
+                    05 G-S-FULLNAME     PIC X(40).
                    05 G-C-LABEL        PIC X(25).
                    05 G-GRADE          PIC 99V99.
+
        01  WS-BUFFER   PIC X(03) VALUE SPACE.
            88  WS-VALUE-NOT-PRESENT VALUE 'Y'.
 
@@ -96,6 +97,15 @@
            03 WS-PNT-COEF     PIC 9,9.
 
        01  WS-IDX PIC 99 VALUE 1.
+       01  WS-IDX2 PIC 99 VALUE 1.
+       01  WS-IDX3 PIC 99 VALUE 1.
+        01  NOTE PIC 999V99.
+       01  COEFFICIENT PIC 9V99.
+        01  MOYENNE PIC 99V99.
+       01  MOYENNE-ARRAY PIC 999V99 OCCURS 1 TO 999 TIMES
+                                    DEPENDING ON WS-IDX.
+       01  WS-COUNT PIC 99 VALUE 0.
+       01  WS-COUNT2 PIC 99 VALUE 0.
      
        01  LINE1 PIC X(300) VALUE ALL "*" . 
        01  LINE2.
@@ -132,23 +142,27 @@
                                           DEPENDING ON WS-IDX.
     
        01  LINE6.
-                  
            03 FILLER PIC X VALUE "*".
            03 FILLER PIC X(4) VALUE ALL " ".
-           03 G-S-FULLNAME OCCURS 1 TO 999 TIMES
-                                          DEPENDING ON WS-IDX.
-           05 NAMEE PIC X(30).
-           05 FILLER PIC X(4) VALUE ALL " ".
-           05 FILLER PIC X VALUE "*".
-           05 FILLER PIC X(44) VALUE ALL " ".
-           05 FILLER PIC X VALUE "*".
-
+           03 NAMEE PIC X(30).
+           03 FILLER PIC X(9) VALUE ALL " ".
+           03 FILLER PIC X VALUE "*".
+           03 FILLER PIC X(14) VALUE ALL " ".
+           03 MOY PIC 99,99.
+           03 FILLER PIC X(25) VALUE ALL " ".
+           03 FILLER PIC X VALUE "*".
+           03 FILLER PIC X(14) VALUE ALL " ".
+           03 NONO OCCURS 6 TIMES.
+               05 BLA.
+                   07 FILLER pic X(10) VALUE SPACES.
+                   07 BLA-VALUE PIC 99,99.
+                   07 FILLER PIC X(13) VALUE SPACES.
+                                         
+          
+           
        PROCEDURE DIVISION.
        1000-MAIN-START.
            PERFORM 7000-READ-START THRU 7000-READ-END. 
-
-           DISPLAY G-S-FULLNAME(1).
-           DISPLAY G-S-FULLNAME(10).
 
 
            PERFORM 7100-WRITE-START THRU 7100-WRITE-END.
@@ -296,20 +310,44 @@
       
       *---------------------------------------------------------------- 
            INITIALIZE WS-IDX
+           INITIALIZE WS-IDX2
+           INITIALIZE WS-IDX3
            INITIALIZE REC-F-OUTPUT.
            MOVE LINE1 TO REC-F-OUTPUT .
            WRITE REC-F-OUTPUT.
-       
            INITIALIZE REC-F-OUTPUT.
-           PERFORM VARYING WS-IDX FROM 1 BY 6 UNTIL 
-                   WS-IDX  > STUDENT-LGTH*6
+     
+        
+            PERFORM VARYING WS-IDX FROM 1 BY 1 UNTIL WS-IDX = 
+            STUDENT-LGTH
+            MOVE STUDENT(WS-IDX) TO NAMEE
+        
+            INITIALIZE NOTE
+            INITIALIZE COEFFICIENT
+        
+            PERFORM VARYING WS-IDX3 FROM 1 BY 1 UNTIL WS-IDX3 = 
+            GRADE-LGTH
+                COMPUTE NOTE = NOTE + G-GRADE(WS-IDX3) * C-COEF(WS-IDX3)
+                COMPUTE COEFFICIENT = COEFFICIENT + C-COEF(WS-IDX3)
+                COMPUTE MOYENNE = NOTE / COEFFICIENT
+            END-PERFORM
+        
+            MOVE MOYENNE TO MOY
+        
+            PERFORM VARYING WS-IDX2 FROM 1 BY 1 UNTIL WS-IDX2 = 
+            GRADE-LGTH
+                MOVE G-GRADE(WS-IDX2) TO BLA-VALUE(WS-IDX2)
+            END-PERFORM
+        
+            MOVE LINE6 TO REC-F-OUTPUT
+            WRITE REC-F-OUTPUT
+            END-PERFORM.
+  
            
-           MOVE S-FIRSTNAME(WS-IDX) TO NAMEE(WS-IDX)
-      
-           END-PERFORM.
+          
+          
              
-             MOVE LINE6 TO REC-F-OUTPUT.
-             WRITE REC-F-OUTPUT.
+             
             
        9030-BODY-END.
       ****************************************************************** 

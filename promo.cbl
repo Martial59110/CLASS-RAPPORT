@@ -85,27 +85,64 @@
                OCCURS 1 TO 999 TIMES
                DEPENDING ON GRADE-LGTH
                INDEXED BY IDX-GRADE. 
-                   05 G-S-FULLNAME     PIC X(40).
+                   
                    05 G-C-LABEL        PIC X(25).
                    05 G-GRADE          PIC 99V99.
        01  WS-BUFFER   PIC X(03) VALUE SPACE.
            88  WS-VALUE-NOT-PRESENT VALUE 'Y'.
 
        01  WS-PNT.
-           03 WS-PNT-NBR      PIC Z9.
            03 WS-PNT-GRADE    PIC Z9,99.
            03 WS-PNT-COEF     PIC 9,9.
 
        01  WS-IDX PIC 99 VALUE 1.
-       01  WS-IDX2 PIC 99 VALUE 1.
-       01  WS-FILL PIC 99V99 VALUE 0.
-       01  WS-STRING PIC X(500).
-       01  NOTE PIC 999V99.
-       01  COEFFICIENT PIC 9V99.
-       01  MOYENNE PIC 99V99.
-       01  STUDENT-IDX2 PIC 99.
-       01  MOYENNE-ARRAY PIC 999V99 OCCURS 1 TO 999 TIMES
-                                    DEPENDING ON WS-IDX.            
+     
+       01  LINE1 PIC X(300) VALUE ALL "*" . 
+       01  LINE2.
+           03  FILLER PIC X VALUE "*".
+           03 FILLER PIC X(150) VALUE ALL " ".
+           03 FILLER PIC X(30) VALUE "BULLETIN DE NOTES".
+           03 FILLER PIC X(118) VALUE ALL " ".
+           03 FILLER PIC X VALUE "*".
+       01  LINE3.
+           03 FILLER PIC X VALUE "*".
+           03 FILLER PIC X(43) VALUE ALL " ".
+           03 FILLER PIC X VALUE "*".
+           03 FILLER PIC X(44) VALUE ALL " ".
+           03 FILLER PIC X VALUE "*".
+       01  LINE4.
+           03 FILLER PIC X VALUE "*".
+           03 FILLER PIC X(30) VALUE ALL " ".
+           03 FILLER PIC X(10) VALUE "NOMBRE DE ".
+           03 VAR PIC X(6) VALUE "ELEVES".
+           03 FILLER PIC X VALUE " ".
+           03 WS-PNT-NBR PIC Z9.
+       01  LINE5.
+           03 FILLER PIC X VALUE "*".
+           03 FILLER PIC X(14) VALUE ALL " ".
+           03 FILLER PIC X(7) VALUE "ELEVES:".
+           03 FILLER PIC X(22) VALUE ALL " ".
+           03 FILLER PIC X VALUE "*".
+           03 FILLER PIC X(14) VALUE ALL " ".
+           03 FILLER PIC X(18) VALUE "MOYENNE GENERALE:".
+           03 FILLER PIC X(12) VALUE ALL " ".
+           03 FILLER PIC X VALUE "*".
+           03 FILLER PIC X(12) VALUE ALL " ".
+           03 WS-COURSE-DISPLAY PIC X(30) OCCURS 1 TO 999 TIMES
+                                          DEPENDING ON WS-IDX.
+    
+       01  LINE6.
+                  
+           03 FILLER PIC X VALUE "*".
+           03 FILLER PIC X(4) VALUE ALL " ".
+           03 G-S-FULLNAME OCCURS 1 TO 999 TIMES
+                                          DEPENDING ON WS-IDX.
+           05 NAMEE PIC X(30).
+           05 FILLER PIC X(4) VALUE ALL " ".
+           05 FILLER PIC X VALUE "*".
+           05 FILLER PIC X(44) VALUE ALL " ".
+           05 FILLER PIC X VALUE "*".
+
        PROCEDURE DIVISION.
        1000-MAIN-START.
            PERFORM 7000-READ-START THRU 7000-READ-END. 
@@ -198,126 +235,81 @@
       ****************************************************************** 
        9010-HEADER-START.
            INITIALIZE REC-F-OUTPUT.
-           MOVE ALL '*' TO REC-F-OUTPUT(1:300).
+           MOVE LINE1 TO REC-F-OUTPUT .
            WRITE REC-F-OUTPUT.
 
            INITIALIZE REC-F-OUTPUT.
-           MOVE '*' TO REC-F-OUTPUT(1:1).
-           MOVE '*' TO REC-F-OUTPUT(300:1).
-           MOVE 'BULLETIN DE NOTES' TO REC-F-OUTPUT(33:20).
+           MOVE LINE2 TO REC-F-OUTPUT .
            WRITE REC-F-OUTPUT.
 
            INITIALIZE REC-F-OUTPUT.
-           MOVE ALL '*' TO REC-F-OUTPUT(1:300).
+           MOVE LINE1 TO REC-F-OUTPUT .
            WRITE REC-F-OUTPUT.           
        9010-HEADER-END.
       ****************************************************************** 
        9020-FOOTER-START.
            INITIALIZE REC-F-OUTPUT.
-           MOVE ALL '*' TO REC-F-OUTPUT(1:300).
+           MOVE LINE1 TO REC-F-OUTPUT .
            WRITE REC-F-OUTPUT.
 
            INITIALIZE REC-F-OUTPUT.
-           MOVE '*' TO REC-F-OUTPUT(1:1).
-           MOVE '*' TO REC-F-OUTPUT(300:1).
-           MOVE 'NOMBRE DE' TO REC-F-OUTPUT(33:9).
-
-           INITIALIZE REC-F-OUTPUT(43:9).
-           MOVE 'ELEVES'   TO REC-F-OUTPUT(43:9).
            MOVE STUDENT-LGTH TO WS-PNT-NBR.
-           MOVE FUNCTION TRIM(WS-PNT-NBR) TO REC-F-OUTPUT(50:2).
-           WRITE REC-F-OUTPUT.
-
-           INITIALIZE REC-F-OUTPUT(43:9).
-           MOVE 'NOTES'    TO REC-F-OUTPUT(43:9).
-           MOVE GRADE-LGTH TO WS-PNT-NBR.
-           MOVE FUNCTION TRIM(WS-PNT-NBR) TO REC-F-OUTPUT(50:2).
-           WRITE REC-F-OUTPUT.
-
-           INITIALIZE REC-F-OUTPUT(43:9).
-           MOVE 'COURS'     TO REC-F-OUTPUT(43:9).
-           MOVE COURSE-LGTH TO WS-PNT-NBR.
-           MOVE FUNCTION TRIM(WS-PNT-NBR) TO REC-F-OUTPUT(50:2).
+           MOVE LINE4 TO REC-F-OUTPUT. 
            WRITE REC-F-OUTPUT.
 
            INITIALIZE REC-F-OUTPUT.
-           MOVE ALL '*' TO REC-F-OUTPUT(1:300).
+           MOVE 'NOTES'    TO VAR.
+           MOVE GRADE-LGTH TO WS-PNT-NBR.
+           MOVE LINE4 TO REC-F-OUTPUT. 
+           WRITE REC-F-OUTPUT.
+
+           INITIALIZE REC-F-OUTPUT.
+           MOVE 'COURS'     TO VAR.
+           MOVE COURSE-LGTH TO WS-PNT-NBR.
+           MOVE LINE4 TO REC-F-OUTPUT. 
+           WRITE REC-F-OUTPUT.
+
+           INITIALIZE REC-F-OUTPUT.
+           MOVE LINE1 TO REC-F-OUTPUT .
            WRITE REC-F-OUTPUT.
        9020-FOOTER-END.
       ****************************************************************** 
        9030-BODY-START.
 
            INITIALIZE REC-F-OUTPUT.
-            MOVE "*"
-           TO REC-F-OUTPUT(1:5)
-           MOVE '*' TO REC-F-OUTPUT(45:1).
-           MOVE "*"
-           TO REC-F-OUTPUT(90:5)
+            MOVE LINE3 TO REC-F-OUTPUT .
            WRITE REC-F-OUTPUT.
 
            INITIALIZE REC-F-OUTPUT.
-            MOVE "*"
-           TO REC-F-OUTPUT(1:5)
-           MOVE 'ELEVES :'   TO REC-F-OUTPUT (15:7)
-           MOVE '*' TO REC-F-OUTPUT(45:1).
-           MOVE 'MOYENNE GENERALE :'   TO REC-F-OUTPUT (60:18)
-           MOVE "*"
-           TO REC-F-OUTPUT(90:5)
-           INITIALIZE WS-IDX
-           
+           INITIALIZE WS-IDX.
+
            PERFORM VARYING WS-IDX FROM 1 BY 1 UNTIL 
                    WS-IDX  > COURSE-LGTH 
        
-            STRING G-C-LABEL(WS-IDX) DELIMITED BY SIZE
-           INTO WS-STRING(25 * WS-FILL:500)
+            MOVE G-C-LABEL(WS-IDX) TO WS-COURSE-DISPLAY(WS-IDX)
            
-           ADD 1 TO WS-FILL
            END-PERFORM.
-           MOVE WS-STRING TO REC-F-OUTPUT (95:199)
-            MOVE '*' TO REC-F-OUTPUT(300:1).
-           WRITE REC-F-OUTPUT.
-           
-           INITIALIZE REC-F-OUTPUT.
-            MOVE "*"
-           TO REC-F-OUTPUT(1:5)
-           MOVE '*' TO REC-F-OUTPUT(45:1).
-           MOVE "*"
-           TO REC-F-OUTPUT(90:5)
+
+           MOVE LINE5 TO REC-F-OUTPUT.
            WRITE REC-F-OUTPUT.
 
+      
       *---------------------------------------------------------------- 
-
-           INITIALIZE REC-F-OUTPUT.
-           MOVE ALL '*' TO REC-F-OUTPUT(1:300).
-           WRITE REC-F-OUTPUT.
            INITIALIZE WS-IDX
+           INITIALIZE REC-F-OUTPUT.
+           MOVE LINE1 TO REC-F-OUTPUT .
+           WRITE REC-F-OUTPUT.
+       
            INITIALIZE REC-F-OUTPUT.
            PERFORM VARYING WS-IDX FROM 1 BY 6 UNTIL 
                    WS-IDX  > STUDENT-LGTH*6
-           MOVE "*"
-           TO REC-F-OUTPUT(1:5)
-           MOVE  FUNCTION TRIM(G-S-FULLNAME(WS-IDX)) 
-           TO REC-F-OUTPUT(5:40)
-           MOVE "*"
-           TO REC-F-OUTPUT(45:1)
-           MOVE "*"
-           TO REC-F-OUTPUT(90:5)
-            SET STUDENT-IDX2 TO 1
-           PERFORM UNTIL STUDENT-IDX2 > STUDENT-LGTH 
-              MOVE ZEROS TO NOTE COEFFICIENT
-              PERFORM VARYING WS-IDX2 FROM 1 BY 1 UNTIL WS-IDX2 > 6
-                 COMPUTE NOTE = NOTE +  G-GRADE(WS-IDX2) * C-COEF
-                 (WS-IDX2)
-                 COMPUTE COEFFICIENT = COEFFICIENT + C-COEF(WS-IDX2)
-              END-PERFORM
-              COMPUTE MOYENNE = NOTE / COEFFICIENT
-              MOVE MOYENNE TO MOYENNE-ARRAY(STUDENT-IDX2)
-              DISPLAy MOYENNE-ARRAY(STUDENT-IDX2)
-              ADD 1 TO STUDENT-IDX2
-           END-PERFORM
-          
-           WRITE REC-F-OUTPUT
+           
+           MOVE S-FIRSTNAME(WS-IDX) TO NAMEE(WS-IDX)
+      
            END-PERFORM.
-
+             
+             MOVE LINE6 TO REC-F-OUTPUT.
+             WRITE REC-F-OUTPUT.
+            
        9030-BODY-END.
       ****************************************************************** 

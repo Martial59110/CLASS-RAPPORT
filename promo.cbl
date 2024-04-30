@@ -324,10 +324,11 @@
         
             INITIALIZE NOTE
             INITIALIZE COEFFICIENT
+             INITIALIZE WS-IDX3
            
         
             PERFORM VARYING WS-IDX3 FROM 1 BY 1 UNTIL WS-IDX3 = 
-            GRADE-LGTH 
+            GRADE-LGTH
 
             ADD 1 TO WS-COUNT
                 COMPUTE NOTE = NOTE + G-GRADE(WS-COUNT) *
@@ -340,18 +341,19 @@
             
            
             MOVE MOYENNE TO MOY
-            SET NOTE TO 0
-            SET COEFFICIENT TO 0
-        
+       
             PERFORM VARYING WS-IDX2 FROM 1 BY 1 UNTIL WS-IDX2 = 
-            GRADE-LGTH
-                MOVE G-GRADE(WS-IDX2) TO BLA-VALUE(WS-IDX2)
+            GRADE-LGTH 
+           
+                MOVE G-GRADE(WS-IDX2 + WS-COUNT2) TO BLA-VALUE(WS-IDX2)
             END-PERFORM
-        
+           ADD 6 TO WS-COUNT2
+            
             MOVE LINE6 TO REC-F-OUTPUT
             WRITE REC-F-OUTPUT
+          
             END-PERFORM.
-  
+          
            
            
           

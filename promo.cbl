@@ -318,21 +318,30 @@
            INITIALIZE REC-F-OUTPUT.
      
         
-            PERFORM VARYING WS-IDX FROM 1 BY 1 UNTIL WS-IDX = 
+            PERFORM VARYING WS-IDX FROM 1 BY 1 UNTIL WS-IDX > 
             STUDENT-LGTH
             MOVE STUDENT(WS-IDX) TO NAMEE
         
             INITIALIZE NOTE
             INITIALIZE COEFFICIENT
+           
         
             PERFORM VARYING WS-IDX3 FROM 1 BY 1 UNTIL WS-IDX3 = 
-            GRADE-LGTH
-                COMPUTE NOTE = NOTE + G-GRADE(WS-IDX3) * C-COEF(WS-IDX3)
-                COMPUTE COEFFICIENT = COEFFICIENT + C-COEF(WS-IDX3)
+            GRADE-LGTH 
+
+            ADD 1 TO WS-COUNT
+                COMPUTE NOTE = NOTE + G-GRADE(WS-COUNT) *
+                 C-COEF(WS-COUNT)
+                COMPUTE COEFFICIENT = COEFFICIENT + 
+                C-COEF(WS-COUNT)
                 COMPUTE MOYENNE = NOTE / COEFFICIENT
+               
             END-PERFORM
-        
+            
+           
             MOVE MOYENNE TO MOY
+            SET NOTE TO 0
+            SET COEFFICIENT TO 0
         
             PERFORM VARYING WS-IDX2 FROM 1 BY 1 UNTIL WS-IDX2 = 
             GRADE-LGTH
@@ -344,7 +353,7 @@
             END-PERFORM.
   
            
-          
+           
           
              
              

@@ -62,12 +62,12 @@
 
        01  DATA-STUDENT.
            03 STUDENT-LGTH     PIC 9(03) VALUE 1.
-           03 STUDENT  
+           03 STUDENT 
                OCCURS 1 TO 999 TIMES
                DEPENDING ON STUDENT-LGTH
                INDEXED BY IDX-STUDENT.
-                   05 S-LASTNAME   PIC X(20).
                    05 S-FIRSTNAME  PIC X(20).
+                   05 S-LASTNAME   PIC X(20).
                    05 S-AGE        PIC 9(02).
 
        01  DATA-COURSE.
@@ -89,7 +89,7 @@
                    05 G-C-LABEL        PIC X(25).
                    05 G-GRADE          PIC 99V99.
 
-       01  WS-BUFFER   PIC X(03) VALUE SPACE.
+       01  WS-BUFFER   PIC X(200) VALUE SPACE.
            88  WS-VALUE-NOT-PRESENT VALUE 'Y'.
 
        01  WS-PNT.
@@ -116,9 +116,9 @@
            03 FILLER PIC X VALUE "*".
        01  LINE3.
            03 FILLER PIC X VALUE "*".
-           03 FILLER PIC X(43) VALUE ALL " ".
+           03 FILLER PIC X(53) VALUE ALL " ".
            03 FILLER PIC X VALUE "*".
-           03 FILLER PIC X(44) VALUE ALL " ".
+           03 FILLER PIC X(34) VALUE ALL " ".
            03 FILLER PIC X VALUE "*".
        01  LINE4.
            03 FILLER PIC X VALUE "*".
@@ -131,11 +131,11 @@
            03 FILLER PIC X VALUE "*".
            03 FILLER PIC X(14) VALUE ALL " ".
            03 FILLER PIC X(7) VALUE "ELEVES:".
-           03 FILLER PIC X(22) VALUE ALL " ".
+           03 FILLER PIC X(32) VALUE ALL " ".
            03 FILLER PIC X VALUE "*".
-           03 FILLER PIC X(14) VALUE ALL " ".
+           03 FILLER PIC X(7) VALUE ALL " ".
            03 FILLER PIC X(18) VALUE "MOYENNE GENERALE:".
-           03 FILLER PIC X(12) VALUE ALL " ".
+           03 FILLER PIC X(9) VALUE ALL " ".
            03 FILLER PIC X VALUE "*".
            03 FILLER PIC X(12) VALUE ALL " ".
            03 WS-COURSE-DISPLAY PIC X(30) OCCURS 1 TO 999 TIMES
@@ -144,12 +144,12 @@
        01  LINE6.
            03 FILLER PIC X VALUE "*".
            03 FILLER PIC X(4) VALUE ALL " ".
-           03 NAMEE PIC X(30).
+           03 FULLNAME PIC X(40).
            03 FILLER PIC X(9) VALUE ALL " ".
            03 FILLER PIC X VALUE "*".
            03 FILLER PIC X(14) VALUE ALL " ".
            03 MOY PIC 99,99.
-           03 FILLER PIC X(25) VALUE ALL " ".
+           03 FILLER PIC X(15) VALUE ALL " ".
            03 FILLER PIC X VALUE "*".
            03 FILLER PIC X(14) VALUE ALL " ".
            03 NONO OCCURS 6 TIMES.
@@ -320,27 +320,31 @@
         
             PERFORM VARYING WS-IDX FROM 1 BY 1 UNTIL WS-IDX > 
             STUDENT-LGTH
-            MOVE STUDENT(WS-IDX) TO NAMEE
-        
-            INITIALIZE NOTE
-            INITIALIZE COEFFICIENT
-             INITIALIZE WS-IDX3
-           
-        
-            PERFORM VARYING WS-IDX3 FROM 1 BY 1 UNTIL WS-IDX3 = 
-            GRADE-LGTH
 
-            ADD 1 TO WS-COUNT
-                COMPUTE NOTE = NOTE + G-GRADE(WS-COUNT) *
-                 C-COEF(WS-COUNT)
+        
+            INITIALIZE NOTE 
+            INITIALIZE COEFFICIENT
+             INITIALIZE WS-BUFFER FullNAME
+
+            MOVE STUDENT(WS-IDX) TO FullNAME
+        
+            PERFORM VARYING WS-IDX3 FROM 1 BY 1 UNTIL WS-IDX3 > 
+            GRADE-LGTH
+               
+               IF FullNAME = G-S-FULLNAME(WS-IDX3)
+               DISPLAY FullNAME
+                COMPUTE NOTE = NOTE + G-GRADE(WS-IDX3) *
+                 C-COEF(WS-IDX3 )
                 COMPUTE COEFFICIENT = COEFFICIENT + 
-                C-COEF(WS-COUNT)
-                COMPUTE MOYENNE = NOTE / COEFFICIENT
+                C-COEF(WS-IDX3 )
+                END-IF
                
             END-PERFORM
-            
-           
+
+            COMPUTE MOYENNE = NOTE / COEFFICIENT
             MOVE MOYENNE TO MOY
+
+            ADD 1 TO WS-COUNT
        
             PERFORM VARYING WS-IDX2 FROM 1 BY 1 UNTIL WS-IDX2 = 
             GRADE-LGTH 

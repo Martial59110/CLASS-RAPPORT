@@ -63,9 +63,8 @@
        01  DATA-STUDENT.
            03 STUDENT-LGTH     PIC 9(03) VALUE 1.
            03 STUDENT 
-               OCCURS 1 TO 999 TIMES
-               DEPENDING ON STUDENT-LGTH
-               INDEXED BY IDX-STUDENT.
+               OCCURS 7 TIMES.
+              
                    05 S-FIRSTNAME  PIC X(20).
                    05 S-LASTNAME   PIC X(20).
                    05 S-AGE        PIC 9(02).
@@ -73,18 +72,16 @@
        01  DATA-COURSE.
            03 COURSE-LGTH     PIC 9(03) VALUE 1.
            03 COURSE
-               OCCURS 1 TO 999 TIMES
-               DEPENDING ON COURSE-LGTH
-               INDEXED BY IDX-COURSE. 
+               OCCURS 46 TIMES.
+              
                    05 C-COEF       PIC 9V99.
                    05 C-LABEL      PIC X(25).
 
        01  DATA-GRADE.
            03 GRADE-LGTH      PIC 9(03) VALUE 1.
            03 GRADE
-               OCCURS 1 TO 999 TIMES
-               DEPENDING ON GRADE-LGTH
-               INDEXED BY IDX-GRADE. 
+               OCCURS 46 TIMES.
+           
                     05 G-S-FULLNAME     PIC X(40).
                    05 G-C-LABEL        PIC X(25).
                    05 G-GRADE          PIC 99V99.
@@ -102,8 +99,8 @@
         01  NOTE PIC 999V99.
        01  COEFFICIENT PIC 9V99.
         01  MOYENNE PIC 99V99.
-       01  MOYENNE-ARRAY PIC 999V99 OCCURS 1 TO 999 TIMES
-                                    DEPENDING ON WS-IDX.
+       01  MOYENNE-ARRAY PIC 999V99 OCCURS 7 TIMES.
+                                 
        01  WS-COUNT PIC 99 VALUE 0.
        01  WS-COUNT2 PIC 99 VALUE 0.
      
@@ -138,8 +135,8 @@
            03 FILLER PIC X(9) VALUE ALL " ".
            03 FILLER PIC X VALUE "*".
            03 FILLER PIC X(12) VALUE ALL " ".
-           03 WS-COURSE-DISPLAY PIC X(30) OCCURS 1 TO 999 TIMES
-                                          DEPENDING ON WS-IDX.
+           03 WS-COURSE-DISPLAY PIC X(30) OCCURS 46 TIMES.
+                                         
     
        01  LINE6.
            03 FILLER PIC X VALUE "*".
@@ -158,15 +155,51 @@
                    07 BLA-VALUE PIC 99,99.
                    07 FILLER PIC X(13) VALUE SPACES.
                                          
-          
+           EXEC SQL BEGIN DECLARE SECTION END-EXEC.
+
+       01  DBNAME                  PIC  X(30) VALUE 'cobolesque'.
+       01  USERNAME                PIC  X(30) VALUE 'cobol'.
+       01  PASSWD                  PIC  X(10) VALUE SPACE.
+
+       01  WS-SQL-STUDENT.
+           05  SQL-S-ID                 PIC 9(05).
+           05  SQL-S-LASTNAME           PIC X(20).
+           05  SQL-S-FIRSTNAME          PIC X(20).
+           05  SQL-S-AGE                PIC 9(04).
+    
+
+       01  WS-SQL-COURSE.
+           05  SQL-C-ID                 PIC 9(05).
+           05  SQL-C-LABEL              PIC X(07).
+           05  SQL-C-COEF               PIC 9V99.
+       
+
+       01  WS-SQL-GRADE.
+           05  SQL-G-ID-STUDENT            PIC 9(05).
+           05  SQL-G-ID-COURSE             PIC 9(05).
+           05  SQL-G-ID                    PIC 9(05).
+           05  SQL-G-GRADE                 PIC 9(05).
+       
+
+           EXEC SQL END DECLARE SECTION END-EXEC.
+  
+           EXEC SQL INCLUDE SQLCA END-EXEC.
+
            
        PROCEDURE DIVISION.
+
+           EXEC SQL
+               CONNECT :USERNAME IDENTIFIED BY :PASSWD USING :DBNAME 
+           END-EXEC.
+
        1000-MAIN-START.
            PERFORM 7000-READ-START THRU 7000-READ-END. 
 
 
            PERFORM 7100-WRITE-START THRU 7100-WRITE-END.
        1000-MAIN-END.
+           EXEC SQL COMMIT WORK END-EXEC.
+           EXEC SQL DISCONNECT ALL END-EXEC. 
            STOP RUN.
       ****************************************************************** 
        7000-READ-START.
@@ -211,26 +244,44 @@
            MOVE R-S-FIRSTNAME  TO S-FIRSTNAME(STUDENT-LGTH).
            MOVE R-S-LASTNAME   TO S-LASTNAME(STUDENT-LGTH).
            MOVE R-S-AGE        TO S-AGE(STUDENT-LGTH).
-
+           MOVE R-S-LASTNAME  TO SQL-S-LASTNAME. 
+           MOVE R-S-FIRSTNAME  TO SQL-S-FIRSTNAME. 
+           MOVE R-S-AGE TO SQL-S-AGE.
+       
+            EXEC SQL
+            INSERT INTO tabstudent (lastname,firstname,age) 
+               VALUES (
+                   :SQL-S-LASTNAME, 
+                   :SQL-S-FIRSTNAME,
+                   :SQL-S-AGE
+                   )
+           END-EXEC.
            SET STUDENT-LGTH UP BY 1.           
        8010-HANDLE-STUDENT-END.
       *****************************************************************s* 
        8020-HANDLE-COURSE-START.
            INITIALIZE WS-BUFFER.
-           SET IDX-COURSE TO 1.
+        
 
-           SEARCH COURSE VARYING IDX-COURSE
-               AT END
-                   SET WS-VALUE-NOT-PRESENT TO TRUE
-               WHEN C-LABEL(IDX-COURSE) = R-C-LABEL
-                   GO TO 8020-HANDLE-COURSE-END 
-           END-SEARCH.
 
-           IF WS-VALUE-NOT-PRESENT
-               MOVE R-C-COEF   TO C-COEF(COURSE-LGTH)
-               MOVE R-C-LABEL  TO C-LABEL(COURSE-LGTH)
-               SET COURSE-LGTH UP BY 1
-           END-IF.
+               MOVE R-C-COEF   TO C-COEF(COURSE-LGTH).
+               MOVE R-C-LABEL  TO C-LABEL(COURSE-LGTH).
+               
+               
+               MOVE C-COEF(COURSE-LGTH) TO SQL-C-COEF .
+           
+               MOVE C-LABEL(COURSE-LGTH) TO SQL-C-LABEL.
+               
+                EXEC SQL
+            INSERT INTO tabcourse(coef,label) 
+               VALUES (
+                   :SQL-C-COEF, 
+                   :SQL-C-LABEL
+                   )
+           END-EXEC.
+           
+               SET COURSE-LGTH UP BY 1.
+          
        8020-HANDLE-COURSE-END.
       ****************************************************************** 
        8030-HANDLE-GRADE-START.
@@ -243,7 +294,14 @@
 
            MOVE R-C-LABEL TO G-C-LABEL(GRADE-LGTH).
            MOVE R-C-GRADE TO G-GRADE(GRADE-LGTH).
-
+           DISPLAY SQLCODE.
+           EXEC SQL
+            INSERT INTO tabgrade(grade) 
+               VALUES (
+                   :SQL-G-GRADE
+                   )
+           END-EXEC.
+            DISPLAY SQLCODE.
            SET GRADE-LGTH UP BY 1.
        8030-HANDLE-GRADE-END.
       ****************************************************************** 
@@ -298,7 +356,7 @@
            INITIALIZE WS-IDX.
 
            PERFORM VARYING WS-IDX FROM 1 BY 1 UNTIL 
-                   WS-IDX  > COURSE-LGTH 
+                   WS-IDX  > 6
        
             MOVE G-C-LABEL(WS-IDX) TO WS-COURSE-DISPLAY(WS-IDX)
            
@@ -316,8 +374,8 @@
            MOVE LINE1 TO REC-F-OUTPUT .
            WRITE REC-F-OUTPUT.
            INITIALIZE REC-F-OUTPUT.
+           
      
-        
             PERFORM VARYING WS-IDX FROM 1 BY 1 UNTIL WS-IDX > 
             STUDENT-LGTH
 
